@@ -10,6 +10,10 @@ Dependences
 
 .. _Revel: http://robfig.github.io/revel
 
+* mgo_
+
+.. _mgo: http://labix.org/mgo
+
 Usage
 =====
 
