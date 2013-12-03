@@ -5,6 +5,9 @@
 module:testrunner
 
 GET     /                                       App.Index
+GET		/activities/queryid						ActivitiesController.Queryid
+GET		/activities/querylist					ActivitiesController.Querylist
+POST	/activities/update						ActivitiesController.Update
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
