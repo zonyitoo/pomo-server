@@ -4,10 +4,13 @@
 
 module:testrunner
 
-GET     /                                       App.Index
 GET		/activities/queryid						ActivitiesController.Queryid
-GET		/activities/querylist					ActivitiesController.Querylist
 POST	/activities/update						ActivitiesController.Update
+
+GET		/tasks/queryid 							TasksController.Queryid
+GET 	/tasks/querylist						TasksController.Querylist
+POST 	/tasks/update 							TasksController.Update
+GET 	/tasks/del								TasksController.Delete
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
@@ -16,4 +19,4 @@ GET     /favicon.ico                            404
 GET     /public/*filepath                       Static.Serve("public")
 
 # Catch all
-*       /:controller/:action                    :controller.:action
+#*       /:controller/:action                    :controller.:action
