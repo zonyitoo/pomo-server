@@ -155,7 +155,8 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 		}
 		task.Create = &tcreate
 	} else {
-		task.Create = &time.Time.Now()
+		t := time.Now()
+		task.Create = &t
 	}
 
 	if deadline != "" {
