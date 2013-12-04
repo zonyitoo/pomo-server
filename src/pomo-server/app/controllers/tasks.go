@@ -42,7 +42,7 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 
 func (c TasksController) Querylist(source, access_token, date, status string) revel.Result {
 
-	var tlist models.TaskObjectList
+	tlist := models.TaskObjectList{Tasks: []models.TaskObject{}}
 
 	tasktype := c.Params.Get("type")
 
@@ -90,6 +90,7 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 			}
 			return c.RenderJson(resp)
 		}
+		tlist.Type = tasktype
 	}
 
 	iter := c.Db.C(models.TASK_COLLECTION_NAME).Find(cond).Iter()

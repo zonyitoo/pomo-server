@@ -101,6 +101,7 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 		result.Type = TASK_TYPE_NORMAL_STR
 	}
 	records, errr := QueryActivitiesByTask(db, t)
+	result.Record = []ActivityObject{}
 	if errr == nil {
 		for i := range records {
 			switch records[i].Status {
