@@ -17,9 +17,9 @@ type Task struct {
 }
 
 const (
-	TASK_STATUS_STOPPED = iota
+	TASK_STATUS_RUNNING = iota
 	TASK_STATUS_COMPLETED
-	TASK_STATUS_RUNNING
+	TASK_STATUS_STOPPED
 )
 
 const (

@@ -17,6 +17,7 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 		resp := models.ResponseObject{
 			Success: false,
 			ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+			Message: "Invalid Id",
 		}
 		return c.RenderJson(resp)
 	}
@@ -27,6 +28,7 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 		resp := models.ResponseObject{
 			Success: false,
 			ErrCode: RESPONSE_STATUS_NOT_FOUND,
+			Message: id + " not found",
 		}
 		return c.RenderJson(resp)
 	}
@@ -54,6 +56,7 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid date",
 			}
 			return c.RenderJson(resp)
 		}
@@ -72,6 +75,7 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid status"
 			}
 			return c.RenderJson(resp)
 		}
@@ -87,6 +91,7 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid type",
 			}
 			return c.RenderJson(resp)
 		}
@@ -131,6 +136,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid type",
 			}
 			return c.RenderJson(resp)
 		}
@@ -143,12 +149,13 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid create time",
 			}
 			return c.RenderJson(resp)
 		}
 		task.Create = &tcreate
 	} else {
-		task.Create = nil
+		task.Create = &time.Now()
 	}
 
 	if deadline != "" {
@@ -158,6 +165,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid deadline time"
 			}
 			return c.RenderJson(resp)
 		}
@@ -178,6 +186,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid status",
 			}
 			return c.RenderJson(resp)
 		}
@@ -188,6 +197,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+				Message: "Invalid id",
 			}
 			return c.RenderJson(resp)
 		}
@@ -198,6 +208,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_PROCESSING_ERROR,
+				Message: "Update " + id + " error: " + err.Error(),
 			}
 			return c.RenderJson(resp)
 		}
@@ -207,6 +218,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_PROCESSING_ERROR,
+				Message: "Insert error: " + err.Error(),
 			}
 			return c.RenderJson(resp)
 		}

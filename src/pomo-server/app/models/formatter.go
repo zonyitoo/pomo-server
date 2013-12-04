@@ -158,5 +158,6 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 type ResponseObject struct {
 	Success bool        `json:"success"`
 	ErrCode int         `json:"code"`
+	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
