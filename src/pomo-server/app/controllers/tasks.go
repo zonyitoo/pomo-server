@@ -75,7 +75,7 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid status"
+				Message: "Invalid status",
 			}
 			return c.RenderJson(resp)
 		}
@@ -165,7 +165,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid deadline time"
+				Message: "Invalid deadline time",
 			}
 			return c.RenderJson(resp)
 		}
