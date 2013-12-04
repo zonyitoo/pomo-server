@@ -37,7 +37,7 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 		Data:    t.ToTaskObject(c.Db),
 	}
 
-	return c.RenderJson(data)
+	return c.RenderJson(resp)
 }
 
 func (c TasksController) Querylist(source, access_token, tasktype, date, status string) revel.Result {
