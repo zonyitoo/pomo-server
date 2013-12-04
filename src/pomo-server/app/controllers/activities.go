@@ -1,7 +1,9 @@
 package controllers
 
-import "github.com/robfig/revel"
-import "pomo-server/app/models"
+import (
+	"github.com/robfig/revel"
+	"pomo-server/app/models"
+)
 
 type ActivitiesController struct {
 	MgoController

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/robfig/revel"
 	"labix.org/v2/mgo/bson"
 	"pomo-server/app/models"
@@ -64,14 +65,8 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 		tlist.Date = date
 	}
 	if status != "" {
-		switch status {
-		case models.TASK_STATUS_STOPPED_STR:
-			cond["status"] = models.TASK_STATUS_STOPPED
-		case models.TASK_STATUS_RUNNING_STR:
-			cond["status"] = models.TASK_STATUS_RUNNING
-		case models.TASK_STATUS_COMPLETED_STR:
-			cond["status"] = models.TASK_STATUS_COMPLETED
-		default:
+		stat, err := models.TaskStatusCode(status)
+		if err != nil {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
@@ -79,22 +74,20 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 			}
 			return c.RenderJson(resp)
 		}
+		cond["status"] = stat
 		tlist.Status = status
 	}
 	if tasktype != "" {
-		switch tasktype {
-		case models.TASK_TYPE_NORMAL_STR:
-			cond["type"] = models.TASK_TYPE_NORMAL
-		case models.TASK_TYPE_URGENT_STR:
-			cond["type"] = models.TASK_TYPE_URGENT
-		default:
+		t, err := models.TaskTypeCode(tasktype)
+		if err != nil {
 			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid type",
+				Message: "Invalid task type",
 			}
 			return c.RenderJson(resp)
 		}
+		cond["type"] = t
 		tlist.Type = tasktype
 	}
 
@@ -113,121 +106,108 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 	return c.RenderJson(resp)
 }
 
-func (c TasksController) Update(source, access_token string) revel.Result {
-	id := c.Params.Get("id")
-
-	task := models.Task{}
-
-	ttype := c.Params.Get("type")
+func (c TasksController) processParamsToTask(task *Task) error {
 	task.Title = c.Params.Get("title")
 	task.Description = c.Params.Get("description")
-	create := c.Params.Get("create")
-	deadline := c.Params.Get("deadline")
-	c.Params.Bind(&task.Estimate, "estimate")
-	status := c.Params.Get("status")
-
-	if ttype != "" {
-		switch ttype {
-		case models.TASK_TYPE_NORMAL_STR:
-			task.Type = models.TASK_TYPE_NORMAL
-		case models.TASK_TYPE_URGENT_STR:
-			task.Type = models.TASK_TYPE_URGENT
-		default:
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid type",
-			}
-			return c.RenderJson(resp)
-		}
-	}
-
-	if create != "" {
-		var tcreate time.Time
-		err1 := tcreate.UnmarshalText([]byte(create))
-		if err1 != nil {
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid create time",
-			}
-			return c.RenderJson(resp)
-		}
-		task.Create = &tcreate
-	} else {
+	ctimestr := c.Params.Get("create")
+	if ctimestr == "" {
 		t := time.Now()
 		task.Create = &t
-	}
-
-	if deadline != "" {
-		var tdeadline time.Time
-		err2 := tdeadline.UnmarshalText([]byte(deadline))
-		if err2 != nil {
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid deadline time",
-			}
-			return c.RenderJson(resp)
-		}
-		task.Deadline = &tdeadline
 	} else {
-		task.Deadline = nil
-	}
-
-	if status != "" {
-		switch status {
-		case models.TASK_STATUS_STOPPED_STR:
-			task.Status = models.TASK_STATUS_STOPPED
-		case models.TASK_STATUS_COMPLETED_STR:
-			task.Status = models.TASK_STATUS_COMPLETED
-		case models.TASK_STATUS_RUNNING_STR:
-			task.Status = models.TASK_STATUS_RUNNING
-		default:
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid status",
-			}
-			return c.RenderJson(resp)
-		}
-	}
-
-	if id != "" {
-		if !bson.IsObjectIdHex(id) {
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
-				Message: "Invalid id",
-			}
-			return c.RenderJson(resp)
-		}
-
-		err := c.Db.C(models.TASK_COLLECTION_NAME).UpdateId(bson.ObjectIdHex(id), &task)
-
+		var t time.Time
+		err = t.UnmarshalText(ctimestr)
 		if err != nil {
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_PROCESSING_ERROR,
-				Message: "Update " + id + " error: " + err.Error(),
-			}
-			return c.RenderJson(resp)
+			return errors.New("Invalid create time")
 		}
-	} else {
-		err := c.Db.C(models.TASK_COLLECTION_NAME).Insert(&task)
-		if err != nil {
-			resp := models.ResponseObject{
-				Success: false,
-				ErrCode: RESPONSE_STATUS_PROCESSING_ERROR,
-				Message: "Insert error: " + err.Error(),
-			}
-			return c.RenderJson(resp)
-		}
+		task.Create = &t
 	}
+	dtimestr := c.Params.Get("dtimestr")
+	if dtimestr != "" {
+		var t time.Time
+		err = t.UnmarshalText(dtimestr)
+		if err != nil {
+			return errors.New("Invalid deadline time")
+		}
+		task.Deadline = &t
+	}
+	c.Params.Bind(&task.Estimate, "estimate")
+	if task.Estimate < 0 {
+		return errors.New("Invalid estimate")
+	}
+	stat := c.Params.Get("status")
+	if stat != "" {
+		s, err := models.TaskStatusCode(stat)
+		if err != nil {
+			return errors.New("Invalid status")
+		}
+		task.Status = stat
+	}
+	ttype := c.Params.Get("type")
+	if ttype != "" {
+		t, err := models.TaskTypeCode(ttype)
+		if err != nil {
+			return errors.New("Invalid type")
+		}
+		task.Type = t
+	}
+
+	return nil
+}
+
+func (c TasksController) Update(source, access_token string) revel.Result {
+	id := c.Params.Get("id")
 
 	resp := models.ResponseObject{
 		Success: true,
 		ErrCode: RESPONSE_STATUS_SUCCESS,
+	}
+
+	if id == "" {
+		// New
+		task := models.Task{}
+
+		err := c.processParamsToTask(&task)
+
+		if err != nil {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = err.Error()
+			return c.RenderJson(resp)
+		}
+
+		err = c.Db.C(models.TASK_COLLECTION_NAME).Insert(&task)
+
+		if err != nil {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = "Invalid type"
+			return c.RenderJson(resp)
+		}
+	} else {
+		// Update
+		if !bson.IsObjectIdHex(id) {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = "Invalid id"
+			return c.RenderJson(resp)
+		}
+
+		var task models.Task
+		err := c.Db.C(models.TASK_COLLECTION_NAME).FindId(bson.ObjectIdHex(id)).One(&task)
+		if err != nil {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = "Invalid id"
+			return c.RenderJson(resp)
+		}
+
+		err = c.processParamsToTask(&task)
+		if err != nil {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = err.Error()
+			return c.RenderJson(resp)
+		}
 	}
 
 	return c.RenderJson(resp)

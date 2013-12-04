@@ -28,7 +28,7 @@ type TaskObject struct {
 	Estimate    int              `json:"estimate"`
 	Complete    int              `json:"complete"`
 	Interrupt   int              `json:"interrupt"`
-	Status      string           `josn:"status"`
+	Status      string           `json:"status"`
 }
 
 const (
