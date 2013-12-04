@@ -216,7 +216,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 		ErrCode: RESPONSE_STATUS_SUCCESS,
 	}
 
-	return c.RenderText(id)
+	return c.RenderJson(resp)
 }
 
 func (c TasksController) Delete() revel.Result {
