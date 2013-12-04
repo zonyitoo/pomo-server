@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/robfig/revel"
-	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"pomo-server/app/models"
 	"time"
@@ -14,8 +13,8 @@ type TasksController struct {
 
 func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 
-	if !bson.IsObjectIdHex(string) {
-		resp := models.RESTResponseObject{
+	if !bson.IsObjectIdHex(id) {
+		resp := models.ResponseObject{
 			Success: false,
 			ErrCode: 400,
 		}
@@ -25,7 +24,7 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 	err := c.Db.C(models.TASK_COLLECTION_NAME).Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&t)
 
 	if err != nil {
-		resp := models.RESTResponseObject{
+		resp := models.ResponseObject{
 			Success: false,
 			ErrCode: 404,
 		}
@@ -40,11 +39,11 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 	var tlist models.TaskObjectList
 
 	cond := bson.M{}
-	if date {
+	if date != "" {
 		var t time.Time
-		err := t.UnmarshalText(date)
+		err := t.UnmarshalText([]byte(date))
 		if err != nil {
-			resp := models.RESTResponseObject{
+			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: 400,
 			}
@@ -53,7 +52,7 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 		cond["create"] = t
 		tlist.Date = date
 	}
-	if status {
+	if status != "" {
 		switch status {
 		case models.TASK_STATUS_STOPPED_STR:
 			cond["status"] = models.TASK_STATUS_STOPPED
@@ -64,7 +63,7 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 		case "":
 
 		default:
-			resp := models.RESTResponseObject{
+			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: 400,
 			}
@@ -72,7 +71,7 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 		}
 		tlist.Status = status
 	}
-	if tasktype {
+	if tasktype != "" {
 		switch tasktype {
 		case models.TASK_TYPE_NORMAL_STR:
 			cond["type"] = models.TASK_TYPE_NORMAL
@@ -81,7 +80,7 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 		case "":
 
 		default:
-			resp := models.RESTResponseObject{
+			resp := models.ResponseObject{
 				Success: false,
 				ErrCode: 400,
 			}
@@ -93,7 +92,7 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 
 	var task models.Task
 	for iter.Next(&task) {
-		tlist.Task = append(tlist.Task, task.ToTaskObject(c.Db))
+		tlist.Tasks = append(tlist.Tasks, task.ToTaskObject(c.Db))
 	}
 
 	return c.RenderJson(tlist)

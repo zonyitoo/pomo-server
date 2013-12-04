@@ -2,7 +2,6 @@ package models
 
 import (
 	"labix.org/v2/mgo"
-	"labix.org/v2/mgo/bson"
 )
 
 type ActivityObject struct {
@@ -151,7 +150,7 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 	return result
 }
 
-type RESTReponseObject struct {
+type ResponseObject struct {
 	Success bool        `json:"success"`
 	ErrCode int         `json:"errcode"`
 	Data    interface{} `json:"data"`

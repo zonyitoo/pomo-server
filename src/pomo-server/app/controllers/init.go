@@ -27,11 +27,11 @@ func BeginSession() {
 }
 
 func (mc *MgoController) OpenDB() revel.Result {
-	mc.db = G_DBSession.DB("pomo")
+	mc.Db = G_DBSession.DB("pomo")
 	return nil
 }
 
 func (mc *MgoController) CloseDB() revel.Result {
-	mc.db = nil
+	mc.Db = nil
 	return nil
 }
