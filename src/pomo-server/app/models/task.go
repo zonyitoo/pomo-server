@@ -5,16 +5,15 @@ import "time"
 
 type Task struct {
 	Id          bson.ObjectId `bson:"_id,omitempty"`
-	Type        int
-	Record      []Activity
-	Title       string
-	Description string
-	Create      *time.Time
-	Deadline    *time.Time
-	Estimate    int
-	Complete    int
-	Interrupt   int
-	Status      int
+	Type        int           `bson:"type"`
+	Title       string        `bson:"title"`
+	Description string        `bson:"description"`
+	Create      *time.Time    `bson:"create"`
+	Deadline    *time.Time    `bson:"deadline"`
+	Estimate    int           `bson:"estimate"`
+	Complete    int           `bson:"complete"`
+	Interrupt   int           `bson:"interrupt"`
+	Status      int           `bson:"status"`
 }
 
 const (
@@ -26,4 +25,8 @@ const (
 const (
 	TASK_TYPE_NORMAL = iota
 	TASK_TYPE_URGENT
+)
+
+const (
+	TASK_COLLECTION_NAME = "Task"
 )

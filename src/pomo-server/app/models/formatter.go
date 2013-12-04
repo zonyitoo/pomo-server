@@ -1,5 +1,10 @@
 package models
 
+import (
+	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
+)
+
 type ActivityObject struct {
 	Id     string `json:"id"`
 	Begin  string `json:"begin"`
@@ -84,7 +89,7 @@ func (a Activity) ToActivityObject() ActivityObject {
 	return result
 }
 
-func (t Task) ToTaskObject() TaskObject {
+func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 	var result TaskObject
 
 	result.Id = t.Id.Hex()
@@ -96,9 +101,13 @@ func (t Task) ToTaskObject() TaskObject {
 	default:
 		result.Type = TASK_TYPE_NORMAL_STR
 	}
-	for i := range t.Record {
-		_ = append(result.Record, t.Record[i].ToActivityObject())
+	records, errr := QueryActivitiesByTask(db, t)
+	if errr == nil {
+		for i := range records {
+			result.Record = append(result.Record, records[i].ToActivityObject())
+		}
 	}
+
 	result.Title = t.Title
 	result.Description = t.Description
 
@@ -140,4 +149,10 @@ func (t Task) ToTaskObject() TaskObject {
 	}
 
 	return result
+}
+
+func QueryActivitiesByTask(db *mgo.Database, task *Task) ([]Activity, error) {
+	var activities []Activity
+	err := db.C(ACTIVITY_COLLECTION_NAME).Find(bson.M{"taskid": task.Id}).All(&activities)
+	return activities, err
 }

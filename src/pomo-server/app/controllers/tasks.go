@@ -4,14 +4,15 @@ import "github.com/robfig/revel"
 import "pomo-server/app/models"
 
 type TasksController struct {
-	*revel.Controller
+	MgoController
 }
 
 func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 
-	var t models.Task
+	//var t models.Task
 
-	return c.RenderJson(t.ToTaskObject())
+	//return c.RenderJson(t.ToTaskObject())
+	return c.RenderText("Queryid %s %s %s", source, access_token, id)
 }
 
 func (c TasksController) Querylist(source, access_token, date, status string) revel.Result {
