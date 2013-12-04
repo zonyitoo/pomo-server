@@ -137,7 +137,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 
 	if create != "" {
 		var tcreate time.Time
-		err1 := tcreate.UnmarshalText(create)
+		err1 := tcreate.UnmarshalText([]byte(create))
 		if err1 != nil {
 			resp := models.ResponseObject{
 				Success: false,
@@ -152,7 +152,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 
 	if deadline != "" {
 		var tdeadline time.Time
-		err2 := tdeadline.UnmarshalText(deadline)
+		err2 := tdeadline.UnmarshalText([]byte(deadline))
 		if err2 != nil {
 			resp := models.ResponseObject{
 				Success: false,
