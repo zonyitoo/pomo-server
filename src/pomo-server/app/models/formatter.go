@@ -50,7 +50,7 @@ type TaskObjectList struct {
 	Tasks  []TaskObject `json:"tasks"`
 }
 
-func (a Activity) ToActivityObject() ActivityObject {
+func (a *Activity) ToActivityObject() ActivityObject {
 	var result ActivityObject
 
 	result.Id = a.Id.Hex()
@@ -151,8 +151,8 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 	return result
 }
 
-func QueryActivitiesByTask(db *mgo.Database, task *Task) ([]Activity, error) {
-	var activities []Activity
-	err := db.C(ACTIVITY_COLLECTION_NAME).Find(bson.M{"taskid": task.Id}).All(&activities)
-	return activities, err
+type RESTReponseObject struct {
+	Success bool        `json:"success"`
+	ErrCode int         `json:"errcode"`
+	Data    interface{} `json:"data"`
 }

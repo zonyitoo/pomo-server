@@ -7,7 +7,7 @@ import (
 
 type MgoController struct {
 	*revel.Controller
-	db *mgo.Database
+	Db *mgo.Database
 }
 
 var G_DBSession *mgo.Session = nil

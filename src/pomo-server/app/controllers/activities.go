@@ -4,7 +4,7 @@ import "github.com/robfig/revel"
 import "pomo-server/app/models"
 
 type ActivitiesController struct {
-	MgoController
+	*MgoController
 }
 
 func (app ActivitiesController) Queryid(source string, access_token string, id string) revel.Result {

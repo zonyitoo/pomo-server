@@ -1,7 +1,9 @@
 package models
 
-import "labix.org/v2/mgo/bson"
-import "time"
+import (
+	"labix.org/v2/mgo/bson"
+	"time"
+)
 
 type Task struct {
 	Id          bson.ObjectId `bson:"_id,omitempty"`

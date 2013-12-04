@@ -1,7 +1,10 @@
 package models
 
-import "time"
-import "labix.org/v2/mgo/bson"
+import (
+	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
+	"time"
+)
 
 type Activity struct {
 	Id     bson.ObjectId `bson:"_id,omitempty"`
@@ -20,3 +23,9 @@ const (
 const (
 	ACTIVITY_COLLECTION_NAME = "Activity"
 )
+
+func QueryActivitiesByTask(db *mgo.Database, task *Task) ([]Activity, error) {
+	var activities []Activity
+	err := db.C(ACTIVITY_COLLECTION_NAME).Find(bson.M{"taskid": task.Id}).All(&activities)
+	return activities, err
+}
