@@ -110,7 +110,7 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 func (c TasksController) Update(source, access_token string) revel.Result {
 	id := c.Params.Get("id")
 
-	task := Task{}
+	task := models.Task{}
 
 	ttype := c.Params.Get("type")
 	task.Title = c.Params.Get("title")
