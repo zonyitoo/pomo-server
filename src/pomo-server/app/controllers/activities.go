@@ -15,7 +15,7 @@ func (app ActivitiesController) Queryid(source string, access_token string, id s
 	app.Validation.Required(access_token)
 
 	if app.Validation.HasErrors() {
-		return app.RenderJson(app.Validation.Errors)
+		return app.RenderJson(app.Validation.ErrorMap())
 	}
 
 	resp := models.Activity{}
