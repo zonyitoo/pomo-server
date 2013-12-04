@@ -110,8 +110,8 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 }
 
 func (c TasksController) Update(source, access_token string) revel.Result {
-
-	return c.RenderText(source)
+	id := c.Params.Get("id")
+	return c.RenderText(id)
 }
 
 func (c TasksController) Delete() revel.Result {

@@ -103,6 +103,12 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 	records, errr := QueryActivitiesByTask(db, t)
 	if errr == nil {
 		for i := range records {
+			switch records[i].Status {
+			case ACTIVITY_STATUS_COMPLETED:
+				result.Complete++
+			case ACTIVITY_STATUS_STOPPED:
+				result.Interrupt++
+			}
 			result.Record = append(result.Record, records[i].ToActivityObject())
 		}
 	}
@@ -133,8 +139,6 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 	}
 
 	result.Estimate = t.Estimate
-	result.Complete = t.Complete
-	result.Interrupt = t.Interrupt
 
 	switch t.Status {
 	case TASK_STATUS_COMPLETED:

@@ -13,8 +13,6 @@ type Task struct {
 	Create      *time.Time    `bson:"create"`
 	Deadline    *time.Time    `bson:"deadline"`
 	Estimate    int           `bson:"estimate"`
-	Complete    int           `bson:"complete"`
-	Interrupt   int           `bson:"interrupt"`
 	Status      int           `bson:"status"`
 }
 
