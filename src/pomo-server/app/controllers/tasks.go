@@ -31,7 +31,13 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 		return c.RenderJson(resp)
 	}
 
-	return c.RenderJson(t.ToTaskObject(c.Db))
+	resp := models.ResponseObject{
+		Success: true,
+		ErrCode: 200,
+		Data:    t.ToTaskObject(c.Db),
+	}
+
+	return c.RenderJson(data)
 }
 
 func (c TasksController) Querylist(source, access_token, tasktype, date, status string) revel.Result {
@@ -95,7 +101,12 @@ func (c TasksController) Querylist(source, access_token, tasktype, date, status 
 		tlist.Tasks = append(tlist.Tasks, task.ToTaskObject(c.Db))
 	}
 
-	return c.RenderJson(tlist)
+	resp := models.ResponseObject{
+		Success: true,
+		ErrCode: 200,
+		Data:    tlist,
+	}
+	return c.RenderJson(resp)
 }
 
 func (c TasksController) Update(source, access_token string) revel.Result {
