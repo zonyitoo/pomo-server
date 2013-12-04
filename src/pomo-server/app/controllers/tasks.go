@@ -117,7 +117,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 	task.Description = c.Params.Get("description")
 	create := c.Params.Get("create")
 	deadline := c.Params.Get("deadline")
-	task.Estimate = c.Params.Get("estimate")
+	c.Params.Bind(&task.Estimate, "estimate")
 	status := c.Params.Get("status")
 
 	if ttype != "" {
