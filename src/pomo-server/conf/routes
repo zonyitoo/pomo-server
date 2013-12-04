@@ -10,7 +10,7 @@ POST	/activities/update						ActivitiesController.Update
 GET		/tasks/queryid 							TasksController.Queryid
 GET 	/tasks/querylist						TasksController.Querylist
 POST 	/tasks/update 							TasksController.Update
-GET 	/tasks/del								TasksController.Delete
+POST 	/tasks/del								TasksController.Delete
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

@@ -106,45 +106,55 @@ func (c TasksController) Querylist(source, access_token, date, status string) re
 	return c.RenderJson(resp)
 }
 
-func (c TasksController) processParamsToTask(task *Task) error {
-	task.Title = c.Params.Get("title")
-	task.Description = c.Params.Get("description")
-	ctimestr := c.Params.Get("create")
-	if ctimestr == "" {
-		t := time.Now()
-		task.Create = &t
-	} else {
-		var t time.Time
-		err = t.UnmarshalText(ctimestr)
-		if err != nil {
-			return errors.New("Invalid create time")
-		}
-		task.Create = &t
+func (c TasksController) processParamsToTask(task *models.Task) error {
+	if d, ok := c.Params.Values["description"]; ok {
+		task.Description = d[0]
 	}
-	dtimestr := c.Params.Get("dtimestr")
-	if dtimestr != "" {
-		var t time.Time
-		err = t.UnmarshalText(dtimestr)
-		if err != nil {
-			return errors.New("Invalid deadline time")
+	if t, ok := c.Params.Values["title"]; ok {
+		task.Title = t[0]
+	}
+
+	if ctimestr, ok := c.Params.Values["create"]; ok {
+		if ctimestr[0] == "" {
+			if task.Create != nil {
+				t := time.Now()
+				task.Create = &t
+			}
+		} else {
+			var t time.Time
+			err := t.UnmarshalText([]byte(ctimestr[0]))
+			if err != nil {
+				return errors.New("Invalid create time")
+			}
+			task.Create = &t
 		}
-		task.Deadline = &t
+	}
+
+	if dtimestr, ok := c.Params.Values["deadline"]; ok {
+		if dtimestr[0] != "" {
+			var t time.Time
+			err := t.UnmarshalText([]byte(dtimestr[0]))
+			if err != nil {
+				return errors.New("Invalid deadline time")
+			}
+			task.Deadline = &t
+		}
 	}
 	c.Params.Bind(&task.Estimate, "estimate")
 	if task.Estimate < 0 {
 		return errors.New("Invalid estimate")
 	}
-	stat := c.Params.Get("status")
-	if stat != "" {
-		s, err := models.TaskStatusCode(stat)
+	if stat, ok := c.Params.Values["status"]; ok {
+		s, err := models.TaskStatusCode(stat[0])
 		if err != nil {
 			return errors.New("Invalid status")
 		}
-		task.Status = stat
+		task.Status = s
 	}
-	ttype := c.Params.Get("type")
-	if ttype != "" {
-		t, err := models.TaskTypeCode(ttype)
+
+	if ttype, ok := c.Params.Values["type"]; ok {
+
+		t, err := models.TaskTypeCode(ttype[0])
 		if err != nil {
 			return errors.New("Invalid type")
 		}
@@ -155,14 +165,13 @@ func (c TasksController) processParamsToTask(task *Task) error {
 }
 
 func (c TasksController) Update(source, access_token string) revel.Result {
-	id := c.Params.Get("id")
 
 	resp := models.ResponseObject{
 		Success: true,
 		ErrCode: RESPONSE_STATUS_SUCCESS,
 	}
 
-	if id == "" {
+	if id, ok := c.Params.Values["id"]; !ok {
 		// New
 		task := models.Task{}
 
@@ -185,7 +194,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 		}
 	} else {
 		// Update
-		if !bson.IsObjectIdHex(id) {
+		if !bson.IsObjectIdHex(id[0]) {
 			resp.Success = false
 			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
 			resp.Message = "Invalid id"
@@ -193,7 +202,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 		}
 
 		var task models.Task
-		err := c.Db.C(models.TASK_COLLECTION_NAME).FindId(bson.ObjectIdHex(id)).One(&task)
+		err := c.Db.C(models.TASK_COLLECTION_NAME).FindId(bson.ObjectIdHex(id[0])).One(&task)
 		if err != nil {
 			resp.Success = false
 			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
@@ -208,11 +217,38 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp.Message = err.Error()
 			return c.RenderJson(resp)
 		}
+
+		err = c.Db.C(models.TASK_COLLECTION_NAME).UpdateId(bson.ObjectIdHex(id[0]), &task)
+		if err != nil {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = err.Error()
+			return c.RenderJson(resp)
+		}
 	}
 
 	return c.RenderJson(resp)
 }
 
 func (c TasksController) Delete() revel.Result {
-	return c.RenderText("")
+
+	resp := models.ResponseObject{
+		Success: true,
+		ErrCode: RESPONSE_STATUS_SUCCESS,
+	}
+
+	if id, ok := c.Params.Values["id"]; ok && bson.IsObjectIdHex(id[0]) {
+		err := c.Db.C(models.TASK_COLLECTION_NAME).RemoveId(bson.ObjectIdHex(id[0]))
+
+		if err != nil {
+			resp.Success = false
+			resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+			resp.Message = err.Error()
+		}
+	} else {
+		resp.Success = false
+		resp.ErrCode = RESPONSE_STATUS_UNRECOGNIZED_PARAM
+		resp.Message = "Invalid id"
+	}
+	return c.RenderJson(resp)
 }
