@@ -156,6 +156,6 @@ func (t *Task) ToTaskObject(db *mgo.Database) TaskObject {
 
 type ResponseObject struct {
 	Success bool        `json:"success"`
-	ErrCode int         `json:"errcode"`
+	ErrCode int         `json:"code"`
 	Data    interface{} `json:"data"`
 }
