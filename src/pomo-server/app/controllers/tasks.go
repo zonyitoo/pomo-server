@@ -14,6 +14,19 @@ type TasksController struct {
 
 func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 
+	c.Validation.Required(source)
+	c.Validation.Required(access_token)
+	c.Validation.Required(id)
+
+	if c.Validation.HasErrors() {
+		resp := models.ResponseObject{
+			Success: false,
+			ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+			Message: "`source`, `access_token` and `id` are REQUIRED",
+		}
+		return c.RenderJson(resp)
+	}
+
 	if !bson.IsObjectIdHex(id) {
 		resp := models.ResponseObject{
 			Success: false,
@@ -44,6 +57,17 @@ func (c TasksController) Queryid(source, access_token, id string) revel.Result {
 }
 
 func (c TasksController) Querylist(source, access_token, date, status string) revel.Result {
+	c.Validation.Required(source)
+	c.Validation.Required(access_token)
+
+	if c.Validation.HasErrors() {
+		resp := models.ResponseObject{
+			Success: false,
+			ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+			Message: "`source` and `access_token` are REQUIRED",
+		}
+		return c.RenderJson(resp)
+	}
 
 	tlist := models.TaskObjectList{Tasks: []models.TaskObject{}}
 
@@ -166,14 +190,27 @@ func (c TasksController) processParamsToTask(task *models.Task) error {
 
 func (c TasksController) Update(source, access_token string) revel.Result {
 
+	c.Validation.Required(source)
+	c.Validation.Required(access_token)
+
+	if c.Validation.HasErrors() {
+		resp := models.ResponseObject{
+			Success: false,
+			ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+			Message: "`source` and `access_token` are REQUIRED",
+		}
+		return c.RenderJson(resp)
+	}
+
 	resp := models.ResponseObject{
 		Success: true,
 		ErrCode: RESPONSE_STATUS_SUCCESS,
 	}
 
+	task := models.Task{}
+
 	if id, ok := c.Params.Values["id"]; !ok {
 		// New
-		task := models.Task{}
 
 		err := c.processParamsToTask(&task)
 
@@ -183,7 +220,7 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			resp.Message = err.Error()
 			return c.RenderJson(resp)
 		}
-
+		task.Id = bson.NewObjectId()
 		err = c.Db.C(models.TASK_COLLECTION_NAME).Insert(&task)
 
 		if err != nil {
@@ -201,7 +238,6 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 			return c.RenderJson(resp)
 		}
 
-		var task models.Task
 		err := c.Db.C(models.TASK_COLLECTION_NAME).FindId(bson.ObjectIdHex(id[0])).One(&task)
 		if err != nil {
 			resp.Success = false
@@ -227,10 +263,24 @@ func (c TasksController) Update(source, access_token string) revel.Result {
 		}
 	}
 
+	resp.Data = task
+
 	return c.RenderJson(resp)
 }
 
-func (c TasksController) Delete() revel.Result {
+func (c TasksController) Delete(source, access_token string) revel.Result {
+
+	c.Validation.Required(source)
+	c.Validation.Required(access_token)
+
+	if c.Validation.HasErrors() {
+		resp := models.ResponseObject{
+			Success: false,
+			ErrCode: RESPONSE_STATUS_UNRECOGNIZED_PARAM,
+			Message: "`source` and `access_token` are REQUIRED",
+		}
+		return c.RenderJson(resp)
+	}
 
 	resp := models.ResponseObject{
 		Success: true,
