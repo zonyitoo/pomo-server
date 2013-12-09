@@ -8,6 +8,7 @@ import (
 
 type Task struct {
 	Id          bson.ObjectId `bson:"_id,omitempty"`
+	UserId      bson.ObjectId `bson:"userid"`
 	Type        int           `bson:"type"`
 	Title       string        `bson:"title"`
 	Description string        `bson:"description"`

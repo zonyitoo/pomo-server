@@ -10,6 +10,7 @@ import (
 type Activity struct {
 	Id     bson.ObjectId `bson:"_id,omitempty"`
 	TaskId bson.ObjectId `bson:"taskid"`
+	UserId bson.ObjectId `bson:"userid"`
 	Begin  *time.Time    `bson:"begin"`
 	End    *time.Time    `bson:"end"`
 	Status int           `bson:"status"`
